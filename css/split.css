@@ -1,0 +1,68 @@
+.split-container.vertical {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.split-container.horizontal {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.split-container .split-left {
+    position:relative;
+    left: 0%;
+    min-width: 10%;
+    height: 100%;
+}
+
+.split-container .v-split {
+    position:relative;
+    width: 12px;
+    height: 100%;
+    background-color: lightgrey;
+    border-style: outset;
+    background-image: url("split.svg");
+}
+
+.split-container .v-split:hover {
+    cursor: w-resize;
+}
+
+.split-container .split-right {
+    position:relative;
+    right: 0%;
+    height: 100%;
+    flex: 1;
+}
+
+.split-container .split-top {
+    position:relative;
+    top: 0%;
+    width: 100%;
+    min-height: 10%;
+}
+
+.split-container .h-split {
+    position:relative;
+    width: 100%;
+    height: 12px;
+    background-color: lightgrey;
+    border-style: outset;
+    background-image: url("split.svg");
+}
+
+.split-container .h-split:hover {
+    cursor: n-resize;
+}
+
+.split-container .split-bottom {
+    position:relative;
+    width: 100%;
+    //height: 79.5%;
+    flex: 1;
+}
+
