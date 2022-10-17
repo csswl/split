@@ -84,77 +84,44 @@
         function v_split_adjust() {
             // console.log('deltaX=' + this.deltaX);
             var parent_width;
-            var width;
             // with boxing-size
             // due to boxing-size, the width may include padding, etc, TODO
-            var mw = $__default['default'](this.options.leftid).outerWidth(true) - $__default['default'](this.options.leftid).width();
-            var split_width = $__default['default'](this.$el).outerWidth(true);
             if (this.options.unit.toLowerCase() === 'px') {
-                var width_left_ori = $__default['default'](this.options.leftid).width();
                 $__default['default'](this.options.leftid).width('+=' + this.deltaX + 'px');
-                /*
-                parent_width = $__default['default'](this.$el[0].parentElement).width();
-                width = width_left_ori + this.deltaX + mw;
-                mw = $__default['default'](this.options.rightid).outerWidth() - $__default['default'](this.options.rightid).width();
-                $__default['default'](this.options.rightid).width((parent_width - split_width - width - mw) + 'px');
-                */
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_width = $__default['default'](this.$el[0].parentElement).width();
                 var delta = this.deltaX / parent_width * 100;
                 $__default['default'](this.options.leftid).width('+=' + delta + this.options.unit);
-                /*
-                width = $__default['default'](this.options.leftid).outerWidth(true);
-                var right_width = 100 - this.options.split_dimension - width / parent_width * 100;
-                $__default['default'](this.options.rightid).width(right_width + this.options.unit);
-                */
             }
         }
 
         function h_split_adjust() {
             // console.log('deltaY=' + this.deltaY);
             var parent_height;
-            var height;
-            var height_top_ori;
-            var mh = $__default['default'](this.options.topid).outerHeight(true) - $__default['default'](this.options.topid).height();
-            var split_height = $__default['default'](this.$el).outerHeight(true);
             if (this.options.unit.toLowerCase() === 'px') {
-                height_top_ori = $__default['default'](this.options.topid).height();
                 $__default['default'](this.options.topid).height('+=' + this.deltaY + 'px');
-                /*
-                parent_height = $__default['default'](this.$el[0].parentElement).height();
-                height = height_top_ori + this.deltaY + mh;
-                mh = $__default['default'](this.options.bottomid).outerHeight() - $__default['default'](this.options.bottomid).height();
-                $__default['default'](this.options.bottomid).height((parent_height - split_height - height - mh) + 'px');
-                */
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_height = $__default['default'](this.$el[0].parentElement).height();
                 var delta = this.deltaY / parent_height * 100;
                 $__default['default'](this.options.topid).height('+=' + delta + '%');
-                /*
-                height = height_top_ori + delta;
-                var bottom_height = 100 - this.options.split_dimension - height;
-                $__default['default'](this.options.bottomid).height(bottom_height + '%');
-                */
             }
         }
 
         function event_split_handler(event) {
-            if (event.data.split_obj === undefined) {
+            if (active_split === undefined) {
                 return;
             }
-            // console.log(event);
-            var split_obj = event.data.split_obj;
-            if (split_obj.options.v_split) {
-                v_split_adjust.call(split_obj);
+
+            if (active_split.v_split) {
+                v_split_adjust.call(active_split);
             }
-            if (split_obj.options.h_split) {
-                h_split_adjust.call(split_obj);
+            if (active_split.h_split) {
+                h_split_adjust.call(active_split);
             }
-            split_obj.trigger('split-dragging');
         }
 
         var document_mouseevent_loaded = false;
@@ -178,15 +145,13 @@
         var DEFAULTS = {
             classes: '',
             escape: false,
-            v_split: true,
-            h_split: false,
             leftid: undefined,
             rightid: undefined,
             topid: undefined,
             bottomid: undefined,
             left_width: undefined,
             top_height: undefined,
-            split_dimension: 4,
+            split_dimension: 8,
             unit: 'px',
             oninitSuccess: function oninitSuccess() {
                 return false;
@@ -197,9 +162,7 @@
             onsplitStart: function onsplitStart() {
                 return false;
             },
-            onsplitDragging: function onsplitDragging() {
-                return false;
-            },
+            onsplitDragging: event_split_handler,
             onsplitDone: function onsplitDone() {
                 return false;
             },
@@ -235,6 +198,8 @@
             function split(el, options) {
                 _classCallCheck(this, split);
                 this.options = options;
+                this.v_split = false;
+                this.h_split = false;
                 this.$el = $__default['default'](el);
                 this.$el_ = this.$el.clone();
             }
@@ -242,8 +207,18 @@
             _createClass(split, [{
                 key: "init",
                 value: function init() {
-                    var v_config_ok = this.options.v_split && this.options.leftid && this.options.rightid;
-                    var h_config_ok = this.options.h_split && this.options.topid && this.options.bottomid;
+                    if (this.$el.hasClass('v-split')) {
+                        this.v_split = true;
+                    }
+                    if (this.$el.hasClass('h-split')) {
+                        this.h_split = true;
+                    }
+                    if ((this.v_split && this.h_split) || (!this.v_split && !this.h_split)) {
+                        this.trigger('init-error');
+                        return;
+                    }
+                    var v_config_ok = this.v_split && this.options.leftid && this.options.rightid;
+                    var h_config_ok = this.h_split && this.options.topid && this.options.bottomid;
                     if (v_config_ok || h_config_ok) {
                         this.initConstants();
                         this.initLocale();
@@ -298,36 +273,34 @@
                         this.screenY = 0;
                         this.$container = this.$el;
                         this.$container.addClass('bootstrap-split');
-                        if (this.options.v_split && this.options.left_width) {
+
+                        if (this.v_split && this.options.left_width) {
                             var mw = $__default['default'](this.options.leftid).outerWidth(true) - $__default['default'](this.options.leftid).width();
                             $__default['default'](this.options.leftid).width((this.options.left_width - mw) + this.options.unit);
                         }
-                        if (this.options.h_split && this.options.top_height) {
+                        if (this.h_split && this.options.top_height) {
                             var mh = $__default['default'](this.options.topid).outerHeight(true) - $__default['default'](this.options.topid).height();
                             $__default['default'](this.options.topid).height((this.options.top_height - mh) + this.options.unit);
                         }
 
                         //attach mouse events
-                        //the splitter itself split:drag event
-                        this.$el.on('split:drag', {split_obj: this}, event_split_handler)
-                            .on('mousedown', function (event) {
-                                if (event.which === 1) {
-                                    active_split = _this_initContainer;
-                                    active_split.split_start = true;
-                                    active_split.screenX = event.screenX;
-                                    active_split.screenY = event.screenY;
-                                    active_split.trigger('split-start');
-                                }
-                            });
+                        this.$el.on('mousedown', function (event) {
+                            if (event.which === 1) {
+                                active_split = _this_initContainer;
+                                active_split.split_start = true;
+                                active_split.screenX = event.screenX;
+                                active_split.screenY = event.screenY;
+                                active_split.trigger('split-start');
+                            }
+                        });
 
                         // catch mouse move and mouse up events in whole document,
                         // because the mouse may move out of the spliter range
                         if (!document_mouseevent_loaded) {
                             $__default['default'](document).on('mousemove mouseup', function (event) {
                                 if (event.which === 1 && active_split) {
-                                    active_split.screenX = event.screenX;
-                                    active_split.screenY = event.screenY;
-                                    active_split.trigger('split:drag');
+                                    active_split.setSplitDrag({screenX: event.screenX, screenY: event.screenY,});
+                                    active_split.trigger('split-dragging');
 
                                     if (event.type === 'mouseup') {
                                         active_split.split_start = false;
@@ -340,10 +313,10 @@
                         }
 
                         var s;
-                        if (this.options.v_split) {
+                        if (this.v_split) {
                             s = [this.options.leftid, this.options.rightid].join(',');
                         }
-                        if (this.options.h_split) {
+                        if (this.h_split) {
                             s = [this.options.topid, this.options.bottomid].join(',');
                         }
                         $__default['default'](s).each(function (idx, ele) {
@@ -353,10 +326,9 @@
                                 $__default['default'](ele.contentWindow.document).on('mousemove mouseup', function (event) {
                                     //console.log(event);
                                     if (event.which === 1 && active_split) {
-                                        active_split.screenX = event.screenX;
-                                        active_split.screenY = event.screenY;
+                                        active_split.setSplitDrag({screenX: event.screenX, screenY: event.screenY,});
 
-                                        active_split.trigger('split:drag');
+                                        active_split.trigger('split-dragging');
                                         if (event.type === 'mouseup') {
                                             active_split.split_start = false;
                                             active_split.trigger('split-done');
