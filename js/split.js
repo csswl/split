@@ -263,10 +263,6 @@
                         this.constants = Constants.CONSTANTS;
                         this.constants.theme = $__default['default'].fn.split.theme;
                         this.constants.dataToggle = this.constants.html.dataToggle || 'data-toggle';
-
-                        if (typeof opts.icons === 'string') {
-                            opts.icons = Utils.calculateObjectValue(null, opts.icons);
-                        }
                     }
                 },
                 {
@@ -321,7 +317,6 @@
                                     active_split.screenX = event.screenX;
                                     active_split.screenY = event.screenY;
                                     active_split.trigger('split-start');
-                                    //console.log(event);
                                 }
                             });
 
@@ -329,17 +324,14 @@
                         // because the mouse may move out of the spliter range
                         if (!document_mouseevent_loaded) {
                             $__default['default'](document).on('mousemove mouseup', function (event) {
-                                //console.log(event);
-                                if (event.which === 1) {
-                                    var $splits = $__default['default']('.v-split, .h-split');
-                                    active_split.split('setSplitDrag', {
-                                        screenX: event.screenX,
-                                        screenY: event.screenY
-                                    }).trigger('split:drag');
-
+                                if (event.which === 1 && active_split) {
+                                    active_split.screenX = event.screenX;
+                                    active_split.screenY = event.screenY;
+                                    active_split.trigger('split:drag');
 
                                     if (event.type === 'mouseup') {
-                                        active_split.split('setSplitDrag', {split_start: false});
+                                        active_split.split_start = false;
+                                        active_split.trigger('split-done');
                                         active_split = undefined;
                                     }
                                 }
@@ -361,13 +353,13 @@
                                 $__default['default'](ele.contentWindow.document).on('mousemove mouseup', function (event) {
                                     //console.log(event);
                                     if (event.which === 1 && active_split) {
-                                        active_split.setSplitDrag({
-                                            screenX: event.screenX,
-                                            screenY: event.screenY
-                                        });
-                                        active_split.$el.trigger('split:drag');
+                                        active_split.screenX = event.screenX;
+                                        active_split.screenY = event.screenY;
+
+                                        active_split.trigger('split:drag');
                                         if (event.type === 'mouseup') {
                                             active_split.split_start = false;
+                                            active_split.trigger('split-done');
                                             active_split = undefined;
                                         }
                                     }
@@ -395,12 +387,7 @@
                                 this.screenY = position.screenY;
                             }
                             if (position.hasOwnProperty('split_start')) {
-                                if (this.split_start && !position.split_start) {
-                                    this.split_start = position.split_start;
-                                    this.trigger('split-done');
-                                }else{
-                                    this.split_start = position.split_start;
-                                }
+                                this.split_start = position.split_start;
                             }
                         }
                 },
