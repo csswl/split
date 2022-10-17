@@ -15,7 +15,7 @@
 .split-container .split-left {
     position:relative;
     left: 0%;
-    min-width: 10%;
+    //min-width: 10%;
     height: 100%;
 }
 
@@ -43,7 +43,7 @@
     position:relative;
     top: 0%;
     width: 100%;
-    min-height: 10%;
+    //min-height: 10%;
 }
 
 .split-container .h-split {
