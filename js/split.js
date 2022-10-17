@@ -154,7 +154,7 @@
             if (split_obj.options.h_split) {
                 h_split_adjust.call(split_obj);
             }
-            split_obj.trigger('split-done');
+            split_obj.trigger('split-dragging');
         }
 
         var document_mouseevent_loaded = false;
@@ -197,6 +197,9 @@
             onsplitStart: function onsplitStart() {
                 return false;
             },
+            onsplitDragging: function onsplitDragging() {
+                return false;
+            },
             onsplitDone: function onsplitDone() {
                 return false;
             },
@@ -209,6 +212,7 @@
             'init-success.bs.split': 'oninitSuccess',
             'init-error.bs.split': 'oninitError',
             'split-start.bs.split': 'onsplitStart',
+            'split-dragging.bs.split': 'onsplitDragging',
             'split-done.bs.split': 'onsplitDone',
         };
 
@@ -312,11 +316,11 @@
                         this.$el.on('split:drag', {split_obj: this}, event_split_handler)
                             .on('mousedown', function (event) {
                                 if (event.which === 1) {
-                                   active_split = _this_initContainer;
+                                    active_split = _this_initContainer;
                                     active_split.split_start = true;
                                     active_split.screenX = event.screenX;
                                     active_split.screenY = event.screenY;
-                                    active_split.trigger('split-done');
+                                    active_split.trigger('split-start');
                                     //console.log(event);
                                 }
                             });
@@ -328,21 +332,16 @@
                                 //console.log(event);
                                 if (event.which === 1) {
                                     var $splits = $__default['default']('.v-split, .h-split');
-                                    $splits.each(function (idx, ele) {
-                                        if ($__default['default'](ele).split('getSplitDragStatus')) {
-                                            //console.log('match: ' + ele);
-                                            //console.log('mouse move : screenX=' + event.screenX + ', screenY=' + event.screenY);
-                                            $__default['default'](ele).split('setSplitDrag', {
-                                                screenX: event.screenX,
-                                                screenY: event.screenY
-                                            }).trigger('split:drag');
+                                    active_split.split('setSplitDrag', {
+                                        screenX: event.screenX,
+                                        screenY: event.screenY
+                                    }).trigger('split:drag');
 
-                                            if (event.type === 'mouseup') {
-                                                $__default['default'](ele).split('setSplitDrag', {split_start: false});
-                                                active_split = undefined;
-                                            }
-                                        }
-                                    });
+
+                                    if (event.type === 'mouseup') {
+                                        active_split.split('setSplitDrag', {split_start: false});
+                                        active_split = undefined;
+                                    }
                                 }
                             });
                             document_mouseevent_loaded = true;
@@ -396,7 +395,12 @@
                                 this.screenY = position.screenY;
                             }
                             if (position.hasOwnProperty('split_start')) {
-                                this.split_start = position.split_start;
+                                if (this.split_start && !position.split_start) {
+                                    this.split_start = position.split_start;
+                                    this.trigger('split-done');
+                                }else{
+                                    this.split_start = position.split_start;
+                                }
                             }
                         }
                 },
