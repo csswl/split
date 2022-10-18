@@ -87,12 +87,12 @@
             // with boxing-size
             // due to boxing-size, the width may include padding, etc, TODO
             if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.leftid).width('+=' + this.deltaX + 'px');
+                $__default['default'](this.options.leftid).width('+=' + this.deltaX / window.devicePixelRatio + 'px');
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_width = $__default['default'](this.$el[0].parentElement).width();
-                var delta = this.deltaX / parent_width * 100;
+                var delta = this.deltaX / window.devicePixelRatio / parent_width * 100;
                 $__default['default'](this.options.leftid).width('+=' + delta + this.options.unit);
             }
         }
@@ -101,26 +101,45 @@
             // console.log('deltaY=' + this.deltaY);
             var parent_height;
             if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.topid).height('+=' + this.deltaY + 'px');
+                $__default['default'](this.options.topid).height('+=' + this.deltaY / window.devicePixelRatio + 'px');
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_height = $__default['default'](this.$el[0].parentElement).height();
-                var delta = this.deltaY / parent_height * 100;
+                var delta = this.deltaY / window.devicePixelRatio / parent_height * 100;
                 $__default['default'](this.options.topid).height('+=' + delta + '%');
             }
         }
 
-        function event_split_handler(event) {
+        function move_split(event) {
             if (active_split === undefined) {
                 return;
             }
-
-            if (active_split.v_split) {
-                v_split_adjust.call(active_split);
+            var deltaX;
+            var deltaY;
+            var left;
+            var top;
+            if (event.type === 'mousemove') {
+                deltaX = (event.screenX - active_split.screenX) / window.devicePixelRatio;
+                deltaY = (event.screenY - active_split.screenY) / window.devicePixelRatio;
+                left = active_split.$el.offset().left;
+                top = active_split.$el.offset().top;
+                if (active_split.v_split) {
+                    active_split.$el_.css('left', deltaX + left);
+                }
+                if (active_split.h_split) {
+                    active_split.$el.css('top', deltaY + top);
+                }
             }
-            if (active_split.h_split) {
-                h_split_adjust.call(active_split);
+            if (event.type === 'mouseup') {
+                active_split.setSplitDrag({'screenX': event.screenX, 'screenY': event.screenY});
+                if (active_split.v_split) {
+                    v_split_adjust.call(active_split);
+                }
+                if (active_split.h_split) {
+                    h_split_adjust.call(active_split);
+                }
+                active_split.$el_.detach();
             }
         }
 
@@ -162,7 +181,7 @@
             onsplitStart: function onsplitStart() {
                 return false;
             },
-            onsplitDragging: event_split_handler,
+            onsplitDragging: move_split(),
             onsplitDone: function onsplitDone() {
                 return false;
             },
@@ -233,7 +252,6 @@
                 {
                     key: "initConstants",
                     value: function initConstants() {
-                        var opts = this.options;
                         this.classes = Constants.CLASSES;
                         this.constants = Constants.CONSTANTS;
                         this.constants.theme = $__default['default'].fn.split.theme;
@@ -290,27 +308,13 @@
                                 active_split.split_start = true;
                                 active_split.screenX = event.screenX;
                                 active_split.screenY = event.screenY;
+                                active_split.$el_.css('position', 'absolute');
+                                active_split.$el_.css('left', active_split.$el.css('left'));
+                                active_split.$el_.css('top', active_split.$el.css('top'));
+                                $__default['default'](active_split.$el[0].parentElement).append(active_split.$el_);
                                 active_split.trigger('split-start');
                             }
                         });
-
-                        // catch mouse move and mouse up events in whole document,
-                        // because the mouse may move out of the spliter range
-                        if (!document_mouseevent_loaded) {
-                            $__default['default'](document).on('mousemove mouseup', function (event) {
-                                if (event.which === 1 && active_split) {
-                                    active_split.setSplitDrag({screenX: event.screenX, screenY: event.screenY,});
-                                    active_split.trigger('split-dragging');
-
-                                    if (event.type === 'mouseup') {
-                                        active_split.split_start = false;
-                                        active_split.trigger('split-done');
-                                        active_split = undefined;
-                                    }
-                                }
-                            });
-                            document_mouseevent_loaded = true;
-                        }
 
                         var s;
                         if (this.v_split) {
@@ -323,17 +327,16 @@
                             //if is iframe, set the document mousemove, mouseup events
                             // and the action object is confirmed to this split
                             if (ele.tagName === 'IFRAME') {
-                                $__default['default'](ele.contentWindow.document).on('mousemove mouseup', function (event) {
-                                    //console.log(event);
+                                $__default['default'](ele.contentWindow.document).on('mousemove', function (event) {
                                     if (event.which === 1 && active_split) {
-                                        active_split.setSplitDrag({screenX: event.screenX, screenY: event.screenY,});
-
-                                        active_split.trigger('split-dragging');
-                                        if (event.type === 'mouseup') {
-                                            active_split.split_start = false;
-                                            active_split.trigger('split-done');
-                                            active_split = undefined;
-                                        }
+                                        move_split(event);
+                                    }
+                                }).on('mouseup', function (event) {
+                                    if (event.which === 1 && active_split) {
+                                        move_split(event);
+                                        active_split.split_start = false;
+                                        active_split.trigger('split-done');
+                                        active_split = undefined;
                                     }
                                 });
                             }
@@ -410,8 +413,8 @@
         split.METHODS = Constants.METHODS;
         split.EVENTS = Constants.EVENTS;
 
-        // SPLIT PLUGIN DEFINITION
-        // =======================
+// SPLIT PLUGIN DEFINITION
+// =======================
 
         $__default['default'].split = split;
 
@@ -464,10 +467,20 @@
         $__default['default'].fn.split.methods = split.METHODS;
 
         // BOOTSTRAP split INIT
-        // =======================
-
         $__default['default'](function () {
             $__default['default']('[data-toggle="split"]').split();
+            $__default['default'](document).on('mousemove', function (event) {
+                if (event.which === 1 && active_split) {
+                    move_split(event);
+                }
+            }).on('mouseup', function (event) {
+                if (event.which === 1 && active_split) {
+                    move_split(event);
+                    active_split.split_start = false;
+                    active_split.trigger('split-done');
+                    active_split = undefined;
+                }
+            });
         });
         return split;
     }
