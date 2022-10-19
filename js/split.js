@@ -87,12 +87,12 @@
             // with boxing-size
             // due to boxing-size, the width may include padding, etc, TODO
             if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.leftid).width('+=' + this.deltaX / window.devicePixelRatio + 'px');
+                $__default['default'](this.options.leftid).width('+=' + this.deltaX + 'px');
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_width = $__default['default'](this.$el[0].parentElement).width();
-                var delta = this.deltaX / window.devicePixelRatio / parent_width * 100;
+                var delta = this.deltaX / parent_width * 100;
                 $__default['default'](this.options.leftid).width('+=' + delta + this.options.unit);
             }
         }
@@ -101,12 +101,12 @@
             // console.log('deltaY=' + this.deltaY);
             var parent_height;
             if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.topid).height('+=' + this.deltaY / window.devicePixelRatio + 'px');
+                $__default['default'](this.options.topid).height('+=' + this.deltaY + 'px');
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_height = $__default['default'](this.$el[0].parentElement).height();
-                var delta = this.deltaY / window.devicePixelRatio / parent_height * 100;
+                var delta = this.deltaY / parent_height * 100;
                 $__default['default'](this.options.topid).height('+=' + delta + '%');
             }
         }
@@ -119,20 +119,24 @@
             var deltaY;
             var left;
             var top;
+
+            var deltaxy = convert_to_split_container_position(event);
+            deltaX = deltaxy[0];
+            deltaY = deltaxy[1];
+
             if (event.type === 'mousemove') {
-                deltaX = (event.screenX - active_split.screenX) / window.devicePixelRatio;
-                deltaY = (event.screenY - active_split.screenY) / window.devicePixelRatio;
                 left = active_split.$el.offset().left;
                 top = active_split.$el.offset().top;
                 if (active_split.v_split) {
                     active_split.$el_.css('left', deltaX + left);
                 }
                 if (active_split.h_split) {
-                    active_split.$el.css('top', deltaY + top);
+                    active_split.$el_.css('top', deltaY + top);
                 }
             }
             if (event.type === 'mouseup') {
-                active_split.setSplitDrag({'screenX': event.screenX, 'screenY': event.screenY});
+                active_split.deltaX = deltaX;
+                active_split.deltaY = deltaY;
                 if (active_split.v_split) {
                     v_split_adjust.call(active_split);
                 }
@@ -143,7 +147,40 @@
             }
         }
 
-        var document_mouseevent_loaded = false;
+        function convert_to_split_container_position(event) {
+            var deltaX, deltaY;
+
+            var eventdoc = event.target.ownerDocument;
+            if (eventdoc === active_split.$el[0].ownerDocument) {
+                deltaX = (event.pageX - active_split.pageX);
+                deltaY = (event.pageY - active_split.pageY);
+            } else {
+                var scroll_left = $__default['default'](eventdoc).scrollLeft();
+                var scroll_top = $__default['default'](eventdoc).scrollTop();
+                var offset_left;
+                var offset_top;
+                if (eventdoc === active_split.leftDocument) {
+                    offset_left = $__default['default'](active_split.options.leftid).offset().left;
+                    offset_top = $__default['default'](active_split.options.leftid).offset().top;
+                }
+                if (eventdoc === active_split.rightDocument) {
+                    offset_left = $__default['default'](active_split.options.rightid).offset().left;
+                    offset_top = $__default['default'](active_split.options.rightid).offset().top;
+                }
+                if (eventdoc === active_split.topDocument) {
+                    offset_left = $__default['default'](active_split.options.topid).offset().left;
+                    offset_top = $__default['default'](active_split.options.topid).offset().top;
+                }
+                if (eventdoc === active_split.bottomDocument) {
+                    offset_left = $__default['default'](active_split.options.bottomid).offset().left;
+                    offset_top = $__default['default'](active_split.options.bottomid).offset().top;
+                }
+
+                deltaX = (event.pageX + scroll_left + offset_left - active_split.pageX);
+                deltaY = (event.pageY + scroll_top + offset_top - active_split.pageY);
+            }
+            return [deltaX, deltaY];
+        }
 
         var CONSTANTS = {
             4: {
@@ -164,12 +201,6 @@
         var DEFAULTS = {
             classes: '',
             escape: false,
-            leftid: undefined,
-            rightid: undefined,
-            topid: undefined,
-            bottomid: undefined,
-            left_width: undefined,
-            top_height: undefined,
             split_dimension: 8,
             unit: 'px',
             oninitSuccess: function oninitSuccess() {
@@ -189,7 +220,7 @@
 
         var EN = {};
 
-        var METHODS = ['destroy', 'getOptions', 'getSplitDragStatus', 'setSplitDrag', 'init',];
+        var METHODS = ['destroy', 'getOptions', 'init',];
         var EVENTS = {
             'init-success.bs.split': 'oninitSuccess',
             'init-error.bs.split': 'oninitError',
@@ -287,8 +318,6 @@
                         this.split_start = false;
                         this.deltaX = 0;
                         this.deltaY = 0;
-                        this.screenX = 0;
-                        this.screenY = 0;
                         this.$container = this.$el;
                         this.$container.addClass('bootstrap-split');
 
@@ -306,8 +335,8 @@
                             if (event.which === 1) {
                                 active_split = _this_initContainer;
                                 active_split.split_start = true;
-                                active_split.screenX = event.screenX;
-                                active_split.screenY = event.screenY;
+                                active_split.pageX = event.pageX;
+                                active_split.pageY = event.pageY;
                                 active_split.$el_.css('position', 'absolute');
                                 active_split.$el_.css('left', active_split.$el.css('left'));
                                 active_split.$el_.css('top', active_split.$el.css('top'));
@@ -327,6 +356,19 @@
                             //if is iframe, set the document mousemove, mouseup events
                             // and the action object is confirmed to this split
                             if (ele.tagName === 'IFRAME') {
+                                if (_this_initContainer.options.leftid && ele.id === _this_initContainer.options.leftid.replace('#', '')) {
+                                    _this_initContainer.leftDocument = ele.contentWindow.document;
+                                }
+                                if (_this_initContainer.options.rightid && ele.id === _this_initContainer.options.rightid.replace('#', '')) {
+                                    _this_initContainer.rightDocument = ele.contentWindow.document;
+                                }
+                                if (_this_initContainer.options.topid && ele.id === _this_initContainer.options.topid.replace('#', '')) {
+                                    _this_initContainer.topDocument = ele.contentWindow.document;
+                                }
+                                if (_this_initContainer.options.bottomid && ele.id === _this_initContainer.options.bottomid.replace('#', '')) {
+                                    _this_initContainer.bottomDocument = ele.contentWindow.document;
+                                }
+
                                 $__default['default'](ele.contentWindow.document).on('mousemove', function (event) {
                                     if (event.which === 1 && active_split) {
                                         move_split(event);
@@ -342,29 +384,6 @@
                             }
                         });
                     },
-                },
-                {
-                    key: 'getSplitDragStatus',
-                    value: function getSplitDragStatus() {
-                        return this.split_start;
-                    }
-                },
-                {
-                    key: "setSplitDrag",
-                    value:
-                        function setSplitDrag(position) {
-                            if (position.hasOwnProperty('screenX')) {
-                                this.deltaX = position.screenX - this.screenX;
-                                this.screenX = position.screenX;
-                            }
-                            if (position.hasOwnProperty('screenY')) {
-                                this.deltaY = position.screenY - this.screenY;
-                                this.screenY = position.screenY;
-                            }
-                            if (position.hasOwnProperty('split_start')) {
-                                this.split_start = position.split_start;
-                            }
-                        }
                 },
                 {
                     key: 'getOptions',
@@ -413,17 +432,12 @@
         split.METHODS = Constants.METHODS;
         split.EVENTS = Constants.EVENTS;
 
-// SPLIT PLUGIN DEFINITION
-// =======================
-
+        // SPLIT PLUGIN DEFINITION
         $__default['default'].split = split;
-
         $__default['default'].fn.split = function (option) {
-
             for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key5 = 1; _key5 < _len2; _key5++) {
                 args[_key5 - 1] = arguments[_key5];
             }
-
             var value;
             this.each(function (i, el) {
                 var data = $__default['default'](el).data('bootstrap.split');
