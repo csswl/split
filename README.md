@@ -14,4 +14,5 @@ The split fires events with init-success.bs.split, init-error.bs,split, split-st
 
 The example is coming from real project and may not run on your system, the perpose is to show how to config your own html
 
-I don't know the reason in code devicePixelRadio / 1.25, maybe in different display, the const 1.25 is differrent.    
+the reason in code devicePixelRadio / 1.25:
+the const 1.25 is the window display scaling setting, my display use 125% scaling, that is it.
