@@ -111,18 +111,18 @@
             }
         }
 
-        function move_split(event) {
+        var device_pixel_radio;
+
+        function move_split_screen(event) {
             if (active_split === undefined) {
                 return;
             }
-            var deltaX;
-            var deltaY;
+            var deltaX, deltaY;
             var left;
             var top;
-
-            var deltaxy = convert_to_split_container_position(event);
-            deltaX = deltaxy[0];
-            deltaY = deltaxy[1];
+            device_pixel_radio = window.devicePixelRatio / 1.25;
+            deltaX = (event.screenX - active_split.screenX) / device_pixel_radio;
+            deltaY = (event.screenY - active_split.screenY) / device_pixel_radio;
 
             if (event.type === 'mousemove') {
                 left = active_split.$el.offset().left;
@@ -133,6 +133,10 @@
                 if (active_split.h_split) {
                     active_split.$el_.css('top', deltaY + top);
                 }
+
+                //console.log('screenX=' + event.screenX + ', screenY=' + event.screenY);
+                //console.log('pageX=' + event.pageX + ', pageY=' + event.pageY);
+
             }
             if (event.type === 'mouseup') {
                 active_split.deltaX = deltaX;
@@ -182,6 +186,64 @@
             return [deltaX, deltaY];
         }
 
+        function mouse_move(event) {
+            if (event.which === 1 && active_split) {
+                move_split_screen(event);
+            }
+        }
+
+        function mouse_up(event) {
+            if (event.which === 1 && active_split) {
+                move_split_screen(event);
+                active_split.split_start = false;
+                active_split = undefined;
+
+            }
+        }
+
+        function set_iframe_mouseevent_it(split, $ele, event_dict) {
+            if ($ele.length && $ele[0].tagName === 'IFRAME') {
+                $ele.on('load', function () {
+                    $__default['default'].each(event_dict, function (eventtype, eventhandler) {
+                        $__default['default']($ele[0].contentDocument).on(eventtype, eventhandler);
+                    });
+                    set_iframe_mouseevent_it(split, $__default['default']($ele[0].contentDocument), event_dict);
+                });
+                return;
+            }
+
+            $__default['default']('iframe', $ele).on('load', function () {
+                var doc = this;
+                $__default['default'].each(event_dict, function (eventtype, eventhandler) {
+                    $__default['default'](doc.contentDocument).on(eventtype, eventhandler);
+                });
+                set_iframe_mouseevent_it(split, $__default['default'](doc.contentDocument), event_dict);
+            });
+
+
+        }
+
+        function set_iframe_mouseevent(split, event_dict) {
+            var $left = split.options.leftid ? $__default['default'](split.options.leftid) : undefined;
+            var $right = split.options.rightid ? $__default['default'](split.options.rightid) : undefined;
+            var $top = split.options.topid ? $__default['default'](split.options.topid) : undefined;
+            var $bottom = split.options.bottomid ? $__default['default'](split.options.bottomid) : undefined;
+
+            //let all iframes belongs to the split dealing the related mouse events
+            if ($left) {
+                set_iframe_mouseevent_it(split, $left, event_dict);
+            }
+            if ($right) {
+                set_iframe_mouseevent_it(split, $right, event_dict);
+            }
+            if ($top) {
+                set_iframe_mouseevent_it(split, $top, event_dict);
+            }
+            if ($bottom) {
+                set_iframe_mouseevent_it(split, $bottom, event_dict);
+            }
+        }
+
         var CONSTANTS = {
             4: {
                 classes: {},
@@ -212,7 +274,7 @@
             onsplitStart: function onsplitStart() {
                 return false;
             },
-            onsplitDragging: move_split(),
+            onsplitDragging: move_split_screen(),
             onsplitDone: function onsplitDone() {
                 return false;
             },
@@ -335,8 +397,10 @@
                             if (event.which === 1) {
                                 active_split = _this_initContainer;
                                 active_split.split_start = true;
-                                active_split.pageX = event.pageX;
-                                active_split.pageY = event.pageY;
+                                //active_split.pageX = event.pageX;
+                                //active_split.pageY = event.pageY;
+                                active_split.screenX = event.screenX;
+                                active_split.screenY = event.screenX;
                                 active_split.$el_.css('position', 'absolute');
                                 active_split.$el_.css('left', active_split.$el.css('left'));
                                 active_split.$el_.css('top', active_split.$el.css('top'));
@@ -355,34 +419,8 @@
                         $__default['default'](s).each(function (idx, ele) {
                             //if is iframe, set the document mousemove, mouseup events
                             // and the action object is confirmed to this split
-                            if (ele.tagName === 'IFRAME') {
-                                if (_this_initContainer.options.leftid && ele.id === _this_initContainer.options.leftid.replace('#', '')) {
-                                    _this_initContainer.leftDocument = ele.contentWindow.document;
-                                }
-                                if (_this_initContainer.options.rightid && ele.id === _this_initContainer.options.rightid.replace('#', '')) {
-                                    _this_initContainer.rightDocument = ele.contentWindow.document;
-                                }
-                                if (_this_initContainer.options.topid && ele.id === _this_initContainer.options.topid.replace('#', '')) {
-                                    _this_initContainer.topDocument = ele.contentWindow.document;
-                                }
-                                if (_this_initContainer.options.bottomid && ele.id === _this_initContainer.options.bottomid.replace('#', '')) {
-                                    _this_initContainer.bottomDocument = ele.contentWindow.document;
-                                }
-
-                                $__default['default'](ele.contentWindow.document).on('mousemove', function (event) {
-                                    if (event.which === 1 && active_split) {
-                                        move_split(event);
-                                    }
-                                }).on('mouseup', function (event) {
-                                    if (event.which === 1 && active_split) {
-                                        move_split(event);
-                                        active_split.split_start = false;
-                                        active_split.trigger('split-done');
-                                        active_split = undefined;
-                                    }
-                                });
-                            }
                         });
+                        set_iframe_mouseevent(_this_initContainer, {'mousemove': mouse_move, 'mouseup': mouse_up});
                     },
                 },
                 {
@@ -484,20 +522,14 @@
         $__default['default'](function () {
             $__default['default']('[data-toggle="split"]').split();
             $__default['default'](document).on('mousemove', function (event) {
-                if (event.which === 1 && active_split) {
-                    move_split(event);
-                }
+                mouse_move(event);
             }).on('mouseup', function (event) {
-                if (event.which === 1 && active_split) {
-                    move_split(event);
-                    active_split.split_start = false;
-                    active_split.trigger('split-done');
-                    active_split = undefined;
-                }
+                mouse_up(event);
             });
         });
         return split;
     }
+
 )))
 ;
 

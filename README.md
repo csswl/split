@@ -13,3 +13,5 @@ User need to set the left part width (vertical split) or the top part height (ho
 The split fires events with init-success.bs.split, init-error.bs,split, split-start.bs.split, split-done.bs.split correspondingly.
 
 The example is coming from real project and may not run on your system, the perpose is to show how to config your own html
+
+I don't know the reason in code devicePixelRadio / 1.25, maybe in different display, the const 1.25 is differrent.    
