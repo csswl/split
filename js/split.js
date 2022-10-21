@@ -389,18 +389,6 @@
                                 active_split.trigger('split-start');
                             }
                         });
-
-                        var s;
-                        if (this.v_split) {
-                            s = [this.options.leftid, this.options.rightid].join(',');
-                        }
-                        if (this.h_split) {
-                            s = [this.options.topid, this.options.bottomid].join(',');
-                        }
-                        $__default['default'](s).each(function (idx, ele) {
-                            //if is iframe, set the document mousemove, mouseup events
-                            // and the action object is confirmed to this split
-                        });
                         set_iframe_mouseevent(_this_initContainer, {'mousemove': mouse_move, 'mouseup': mouse_up});
                     },
                 },
