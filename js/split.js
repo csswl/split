@@ -112,6 +112,7 @@
         }
 
         var device_pixel_radio;
+        var devicePixelRadio_OS;
 
         function move_split_screen(event) {
             if (active_split === undefined) {
@@ -120,7 +121,7 @@
             var deltaX, deltaY;
             var left;
             var top;
-            device_pixel_radio = window.devicePixelRatio / 1.25;
+            device_pixel_radio = window.devicePixelRatio / devicePixelRadio_OS;
             deltaX = (event.screenX - active_split.screenX) / device_pixel_radio;
             deltaY = (event.screenY - active_split.screenY) / device_pixel_radio;
 
@@ -133,10 +134,6 @@
                 if (active_split.h_split) {
                     active_split.$el_.css('top', deltaY + top);
                 }
-
-                //console.log('screenX=' + event.screenX + ', screenY=' + event.screenY);
-                //console.log('pageX=' + event.pageX + ', pageY=' + event.pageY);
-
             }
             if (event.type === 'mouseup') {
                 active_split.deltaX = deltaX;
@@ -151,40 +148,6 @@
             }
         }
 
-        function convert_to_split_container_position(event) {
-            var deltaX, deltaY;
-
-            var eventdoc = event.target.ownerDocument;
-            if (eventdoc === active_split.$el[0].ownerDocument) {
-                deltaX = (event.pageX - active_split.pageX);
-                deltaY = (event.pageY - active_split.pageY);
-            } else {
-                var scroll_left = $__default['default'](eventdoc).scrollLeft();
-                var scroll_top = $__default['default'](eventdoc).scrollTop();
-                var offset_left;
-                var offset_top;
-                if (eventdoc === active_split.leftDocument) {
-                    offset_left = $__default['default'](active_split.options.leftid).offset().left;
-                    offset_top = $__default['default'](active_split.options.leftid).offset().top;
-                }
-                if (eventdoc === active_split.rightDocument) {
-                    offset_left = $__default['default'](active_split.options.rightid).offset().left;
-                    offset_top = $__default['default'](active_split.options.rightid).offset().top;
-                }
-                if (eventdoc === active_split.topDocument) {
-                    offset_left = $__default['default'](active_split.options.topid).offset().left;
-                    offset_top = $__default['default'](active_split.options.topid).offset().top;
-                }
-                if (eventdoc === active_split.bottomDocument) {
-                    offset_left = $__default['default'](active_split.options.bottomid).offset().left;
-                    offset_top = $__default['default'](active_split.options.bottomid).offset().top;
-                }
-
-                deltaX = (event.pageX + scroll_left + offset_left - active_split.pageX);
-                deltaY = (event.pageY + scroll_top + offset_top - active_split.pageY);
-            }
-            return [deltaX, deltaY];
-        }
 
         function mouse_move(event) {
             if (event.which === 1 && active_split) {
@@ -219,8 +182,6 @@
                 });
                 set_iframe_mouseevent_it(split, $__default['default'](doc.contentDocument), event_dict);
             });
-
-
         }
 
         function set_iframe_mouseevent(split, event_dict) {
@@ -242,6 +203,27 @@
             if ($bottom) {
                 set_iframe_mouseevent_it(split, $bottom, event_dict);
             }
+        }
+
+        function detectZoom() {
+            //the code comes from https://www.cnblogs.com/chenzeyongjsj/p/10430975.html
+            var ratio = 0,
+                screen = window.screen,
+                ua = navigator.userAgent.toLowerCase();
+
+            if (~ua.indexOf("firefox")) {
+                if (window.devicePixelRatio !== undefined) {
+                    ratio = window.devicePixelRatio;
+                }
+            } else if (~ua.indexOf("msie")) {
+                if (screen.deviceXDPI && screen.logicalXDPI) {
+                    ratio = screen.deviceXDPI / screen.logicalXDPI;
+                }
+            } else if (window.outerWidth !== undefined && window.innerWidth !== undefined) {
+                ratio = window.outerWidth / window.innerWidth;
+            }
+            // TODO 360安全浏览器下的innerWidth包含了侧边栏的宽度
+            return ratio;
         }
 
         var CONSTANTS = {
@@ -377,11 +359,15 @@
                     key: "initContainer",
                     value: function initContainer() {
                         var _this_initContainer = this;
+                        var radio = detectZoom();
+                        devicePixelRadio_OS = Math.round(window.devicePixelRatio / radio * 100) / 100.0;
+
                         this.split_start = false;
                         this.deltaX = 0;
                         this.deltaY = 0;
                         this.$container = this.$el;
                         this.$container.addClass('bootstrap-split');
+
 
                         if (this.v_split && this.options.left_width) {
                             var mw = $__default['default'](this.options.leftid).outerWidth(true) - $__default['default'](this.options.leftid).width();
@@ -397,8 +383,6 @@
                             if (event.which === 1) {
                                 active_split = _this_initContainer;
                                 active_split.split_start = true;
-                                //active_split.pageX = event.pageX;
-                                //active_split.pageY = event.pageY;
                                 active_split.screenX = event.screenX;
                                 active_split.screenY = event.screenX;
                                 active_split.$el_.css('position', 'absolute');

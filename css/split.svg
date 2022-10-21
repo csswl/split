@@ -1,12 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="4" height="4"
-     viewBox="0 0 4 4" fill="balck">
-    <circle cx="1" cy="1" r="0.25"></circle>
-    <circle cx="2" cy="1" r="0.25"></circle>
-    <circle cx="3" cy="1" r="0.25"></circle>
-    <circle cx="1" cy="2" r="0.25"></circle>
-    <circle cx="2" cy="2" r="0.25"></circle>
-    <circle cx="3" cy="2" r="0.25"></circle>
-    <circle cx="1" cy="3" r="0.25"></circle>
-    <circle cx="2" cy="3" r="0.25"></circle>
-    <circle cx="3" cy="3" r="0.25"></circle>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1" height="1"
+     viewBox="0 0 1 1" fill="balck">
+    <circle cx="0.5" cy="0.5" r="0.25"></circle>
 </svg>
