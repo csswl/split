@@ -359,9 +359,6 @@
                     key: "initContainer",
                     value: function initContainer() {
                         var _this_initContainer = this;
-                        var radio = detectZoom();
-                        devicePixelRadio_OS = Math.round(window.devicePixelRatio / radio * 100) / 100.0;
-
                         this.split_start = false;
                         this.deltaX = 0;
                         this.deltaY = 0;
@@ -445,8 +442,7 @@
             ]);
 
             return split;
-        }
-        ();
+        }();
 
         split.VERSION = Constants.VERSION;
         split.DEFAULTS = Constants.DEFAULTS;
@@ -510,6 +506,8 @@
             }).on('mouseup', function (event) {
                 mouse_up(event);
             });
+            var radio = detectZoom();
+            devicePixelRadio_OS = Math.round(window.devicePixelRatio / radio * 100) / 100.0;
         });
         return split;
     }
