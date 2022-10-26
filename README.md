@@ -16,3 +16,5 @@ The example is coming from real project and may not run on your system, the perp
 
 the reason in code devicePixelRadio / 1.25:
 the const 1.25 is the window display scaling setting, my display use 125% scaling, that is it.
+
+Now this constant is calculated automatically.
