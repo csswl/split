@@ -18,3 +18,12 @@ the reason in code devicePixelRadio / 1.25:
 the const 1.25 is the window display scaling setting, my display use 125% scaling, that is it.
 
 Now this constant is calculated automatically.
+
+Issues:
+
+I found if the page running on local (window10) without web server, when the dragger is in iframe range, offen you can not move it.
+if you move the cursor to the split (any one) or the scroll bar (all these elements are belongs to the main page), you can move the dragger.
+
+If it is running under web server, it is no problem.
+
+
