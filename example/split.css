@@ -1,0 +1,67 @@
+.split-container-vertical {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.split-container-horizontal {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.split-left {
+    position:relative;
+    left: 0%;
+    height: 100%;
+}
+
+.v-split {
+    position:relative;
+    width: 12px;
+    left: 0%;
+    height: 100%;
+    background-color: lightgrey;
+    border-style: outset;
+    background-image: url("split.svg");
+    overflow: hidden;
+    margin: 0;
+    user-select:none;
+    cursor: w-resize;
+}
+
+.split-right {
+    position:relative;
+    right: 0%;
+    height: 100%;
+    flex: 1;
+}
+
+.split-top {
+    position:relative;
+    top: 0%;
+    width: 100%;
+}
+
+.h-split {
+    position:relative;
+    width: 100%;
+    top: 0%;
+    height: 12px;
+    background-color: lightgrey;
+    border-style: outset;
+    background-image: url("split.svg");
+    overflow: hidden;
+    margin: 0;
+    user-select:none;
+    cursor: n-resize;
+}
+
+.split-bottom {
+    position:relative;
+    width: 100%;
+    flex: 1;
+}
+
