@@ -1,65 +1,65 @@
-.split-container.vertical {
+.split-container-vertical {
     display: inline-flex;
     flex-wrap: nowrap;
     justify-content: flex-start;
     flex-direction: row;
 }
 
-.split-container.horizontal {
+.split-container-horizontal {
     display: inline-flex;
     flex-wrap: nowrap;
     justify-content: flex-start;
     flex-direction: column;
 }
 
-.split-container .split-left {
+.split-left {
     position:relative;
     left: 0%;
-    //min-width: 10%;
     height: 100%;
 }
 
-.split-container .v-split {
+.v-split {
     position:relative;
     width: 12px;
+    left: 0%;
     height: 100%;
     background-color: lightgrey;
     border-style: outset;
     background-image: url("split.svg");
-}
-
-.v-split:hover {
+    overflow: hidden;
+    margin: 0;
+    user-select:none;
     cursor: w-resize;
 }
 
-.split-container .split-right {
+.split-right {
     position:relative;
     right: 0%;
     height: 100%;
     flex: 1;
 }
 
-.split-container .split-top {
+.split-top {
     position:relative;
     top: 0%;
     width: 100%;
-    //min-height: 10%;
 }
 
-.split-container .h-split {
+.h-split {
     position:relative;
     width: 100%;
+    top: 0%;
     height: 12px;
     background-color: lightgrey;
     border-style: outset;
     background-image: url("split.svg");
-}
-
-.h-split:hover {
+    overflow: hidden;
+    margin: 0;
+    user-select:none;
     cursor: n-resize;
 }
 
-.split-container .split-bottom {
+.split-bottom {
     position:relative;
     width: 100%;
     flex: 1;

@@ -87,28 +87,30 @@
             // with boxing-size
             // due to boxing-size, the width may include padding, etc, TODO
             if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.leftid).width('+=' + this.deltaX + 'px');
+                $__default['default'](this.options.leftid).css('width', '+=' + this.deltaX + 'px');
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_width = $__default['default'](this.$el[0].parentElement).width();
                 var delta = this.deltaX / parent_width * 100;
-                $__default['default'](this.options.leftid).width('+=' + delta + this.options.unit);
+                $__default['default'](this.options.leftid).css('width', '+=' + delta + '%');
             }
+            $__default['default'](this.$el).css('width', this.split_dimension);
         }
 
         function h_split_adjust() {
             // console.log('deltaY=' + this.deltaY);
             var parent_height;
             if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.topid).height('+=' + this.deltaY + 'px');
+                $__default['default'](this.options.topid).css('height', '+=' + this.deltaY + 'px');
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
                 parent_height = $__default['default'](this.$el[0].parentElement).height();
                 var delta = this.deltaY / parent_height * 100;
-                $__default['default'](this.options.topid).height('+=' + delta + '%');
+                $__default['default'](this.options.topid).css('height', '+=' + delta + '%');
             }
+            $__default['default'](this.$el).css('height', this.split_dimension);
         }
 
         var device_pixel_radio;
@@ -126,13 +128,11 @@
             deltaY = (event.screenY - active_split.screenY) / device_pixel_radio;
 
             if (event.type === 'mousemove') {
-                left = active_split.$el.offset().left;
-                top = active_split.$el.offset().top;
                 if (active_split.v_split) {
-                    active_split.$el_.css('left', deltaX + left);
+                    active_split.$el_.css('left', active_split.ori_left + deltaX);
                 }
                 if (active_split.h_split) {
-                    active_split.$el_.css('top', deltaY + top);
+                    active_split.$el_.css('top', active_split.ori_top + deltaY );
                 }
             }
             if (event.type === 'mouseup') {
@@ -365,14 +365,17 @@
                         this.$container = this.$el;
                         this.$container.addClass('bootstrap-split');
 
-
                         if (this.v_split && this.options.left_width) {
-                            var mw = $__default['default'](this.options.leftid).outerWidth(true) - $__default['default'](this.options.leftid).width();
-                            $__default['default'](this.options.leftid).width((this.options.left_width - mw) + this.options.unit);
+                            // ignore border
+                            this.split_dimension = $__default['default'](this.$el).width();
+                            $__default['default'](this.options.leftid).css('width', this.options.left_width + this.options.unit);
+                            $__default['default'](this.$el).css('width', this.split_dimension);
                         }
                         if (this.h_split && this.options.top_height) {
-                            var mh = $__default['default'](this.options.topid).outerHeight(true) - $__default['default'](this.options.topid).height();
-                            $__default['default'](this.options.topid).height((this.options.top_height - mh) + this.options.unit);
+                            // ignore border
+                            this.split_dimension = $__default['default'](this.$el).height();
+                            $__default['default'](this.options.topid).css('height',this.options.top_height + this.options.unit);
+                            $__default['default'](this.$el).css('height', this.split_dimension);
                         }
 
                         //attach mouse events
@@ -381,11 +384,23 @@
                                 active_split = _this_initContainer;
                                 active_split.split_start = true;
                                 active_split.screenX = event.screenX;
-                                active_split.screenY = event.screenX;
-                                active_split.$el_.css('position', 'absolute');
-                                active_split.$el_.css('left', active_split.$el.css('left'));
-                                active_split.$el_.css('top', active_split.$el.css('top'));
-                                $__default['default'](active_split.$el[0].parentElement).append(active_split.$el_);
+                                active_split.screenY = event.screenY;
+
+                                device_pixel_radio = window.devicePixelRatio / devicePixelRadio_OS;
+                                active_split.$el_.css('position', 'fixed');
+                                var left = event.clientX - event.offsetX;
+                                var top = event.clientY - event.offsetY;
+                                active_split.ori_left = left;
+                                active_split.ori_top = top;
+                                if (active_split.v_split) {
+                                    active_split.$el_.css('left', left);
+                                    active_split.$el_.css('top', 0);
+                                }
+                                if (active_split.h_split) {
+                                    active_split.$el_.css('top', top);
+                                    active_split.$el_.css('left', 0);
+                                }
+                                $__default['default'](window.top.document.body).append(active_split.$el_);
                                 active_split.trigger('split-start');
                             }
                         });
