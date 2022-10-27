@@ -91,11 +91,11 @@
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
-                parent_width = $__default['default'](this.$el[0].parentElement).width();
+                parent_width = $__default['default'](this.$split[0].parentElement).width();
                 var delta = this.deltaX / parent_width * 100;
                 $__default['default'](this.options.leftid).css('width', '+=' + delta + '%');
             }
-            $__default['default'](this.$el).css('width', this.split_dimension);
+            $__default['default'](this.$split).css('width', this.split_dimension);
         }
 
         function h_split_adjust() {
@@ -106,11 +106,11 @@
             }
             if (this.options.unit === '%') {
                 // ignore the border margin padding (to complex, TODO)
-                parent_height = $__default['default'](this.$el[0].parentElement).height();
+                parent_height = $__default['default'](this.$split[0].parentElement).height();
                 var delta = this.deltaY / parent_height * 100;
                 $__default['default'](this.options.topid).css('height', '+=' + delta + '%');
             }
-            $__default['default'](this.$el).css('height', this.split_dimension);
+            $__default['default'](this.$split).css('height', this.split_dimension);
         }
 
         var device_pixel_radio;
@@ -129,10 +129,10 @@
 
             if (event.type === 'mousemove') {
                 if (active_split.v_split) {
-                    active_split.$el_.css('left', active_split.ori_left + deltaX);
+                    active_split.$split_.css('left', active_split.ori_left + deltaX);
                 }
                 if (active_split.h_split) {
-                    active_split.$el_.css('top', active_split.ori_top + deltaY );
+                    active_split.$split_.css('top', active_split.ori_top + deltaY);
                 }
             }
             if (event.type === 'mouseup') {
@@ -144,7 +144,7 @@
                 if (active_split.h_split) {
                     h_split_adjust.call(active_split);
                 }
-                active_split.$el_.detach();
+                active_split.$split_.detach();
             }
         }
 
@@ -245,6 +245,7 @@
         var DEFAULTS = {
             classes: '',
             escape: false,
+            first_dimension: 200,
             split_dimension: 8,
             unit: 'px',
             oninitSuccess: function oninitSuccess() {
@@ -288,6 +289,7 @@
         };
 
         var active_split;
+        var container_sequence = 0;
         var split = /*#__PURE__*/ function () {
             function split(el, options) {
                 _classCallCheck(this, split);
@@ -301,27 +303,15 @@
             _createClass(split, [{
                 key: "init",
                 value: function init() {
-                    if (this.$el.hasClass('v-split')) {
-                        this.v_split = true;
-                    }
-                    if (this.$el.hasClass('h-split')) {
-                        this.h_split = true;
-                    }
-                    if ((this.v_split && this.h_split) || (!this.v_split && !this.h_split)) {
+                    if ((this.options.vertical && this.options.horizontal) || (!this.options.vertical && !this.options.horizontal)) {
                         this.trigger('init-error');
                         return;
                     }
-                    var v_config_ok = this.v_split && this.options.leftid && this.options.rightid;
-                    var h_config_ok = this.h_split && this.options.topid && this.options.bottomid;
-                    if (v_config_ok || h_config_ok) {
-                        this.initConstants();
-                        this.initLocale();
-                        this.initContainer();
-                        this.trigger('init-success');
-                    } else {
-                        this.trigger('init-error');
-                        return;
-                    }
+
+                    this.initConstants();
+                    this.initLocale();
+                    this.initContainer();
+                    this.trigger('init-success');
                 }
             },
                 {
@@ -365,21 +355,111 @@
                         this.$container = this.$el;
                         this.$container.addClass('bootstrap-split');
 
-                        if (this.v_split && this.options.left_width) {
-                            // ignore border
-                            this.split_dimension = $__default['default'](this.$el).width();
-                            $__default['default'](this.options.leftid).css('width', this.options.left_width + this.options.unit);
-                            $__default['default'](this.$el).css('width', this.split_dimension);
+                        var container_id;
+
+                        if (this.$el[0].hasAttribute('id')) {
+                            container_id = this.$el[0].id;
+                        } else {
+                            container_sequence += 1;
+                            container_id = 'split_container_' + (container_sequence);
+                            this.$el[0].setAttribute('id', container_id);
                         }
-                        if (this.h_split && this.options.top_height) {
+
+                        if (this.options.vertical) {
+                            this.$container.addClass('split-container-vertical');
+                            this.v_split = true;
+                            var children = this.$el[0].children;
+                            if (children.length >= 2) {
+                                // create left
+                                if (children[0].hasAttribute('id')) {
+                                    this.options.leftid = '#' + children[0].id;
+                                } else {
+                                    children[0].setAttribute('id', container_id + '_left');
+                                    this.options.leftid = '#' + children[0].id;
+                                }
+                                $__default['default'](children[0]).addClass('split-left');
+
+                                // create split
+                                var $split_ = $__default['default']('<div class=\"v-split\" id=\"' + container_id + '_split' + '\"></div>');
+                                $split_.insertAfter($__default['default'](children[0]));
+                                this.$split = $split_;
+                                this.$split_ = $split_.clone();
+
+                                //create right
+                                // we has add one split, the length increased by 1
+                                if (children.length === 3) {
+                                    if (children[2].hasAttribute('id')) {
+                                        this.options.rightid = '#' + children[2].id;
+                                    } else {
+                                        children[2].setAttribute('id', container_id + '_right');
+                                        this.options.rightid = '#' + container_id + '_right';
+                                    }
+                                    $__default['default'](children[2]).addClass('split-right');
+                                } else {
+                                    var $div = $__default['default']('<div class=\"split-right\" id=\"' + container_id + '_right' + '\"></div>');
+                                    $div.insertAfter($split_);
+                                    for (var i=2;i< children.length;i++) {
+                                        $div[0].append(children[i]);
+                                    }
+                                    this.options.rightid = '#' + container_id + '_right';
+                                }
+                            }
+                        }
+
+                        if (this.options.horizontal) {
+                            this.$container.addClass('split-container-horizontal');
+                            this.h_split = true;
+                            var children = this.$el[0].children;
+                            if (children.length >= 2) {
+                                // create top
+                                if (children[0].hasAttribute('id')) {
+                                    this.options.topid = '#' + children[0].id;
+                                } else {
+                                    children[0].setAttribute('id', container_id + '_top');
+                                    this.options.topid = '#' + children[0].id;
+                                }
+                                $__default['default'](children[0]).addClass('split-top');
+
+                                // create split
+                                var $split_ = $__default['default']('<div class=\"h-split\" id=\"' + container_id + '_split' + '\"></div>');
+                                $split_.insertAfter($__default['default'](children[0]));
+                                this.$split = $split_;
+                                this.$split_ = $split_.clone();
+
+                                //create bottom
+                                // we has add one split, the length increased by 1
+                                if (children.length === 3) {
+                                    if (children[2].hasAttribute('id')) {
+                                        this.options.bottomid = '#' + children[2].id;
+                                    } else {
+                                        children[2].setAttribute('id', container_id + '_bottom');
+                                        this.options.bottomid = '#' + container_id + '_bottom';
+                                    }
+                                    $__default['default'](children[2]).addClass('split-bottom');
+                                } else {
+                                    var $div = $__default['default']('<div class=\"split-bottom\" id=\"' + container_id + '_bottom' + '\"></div>');
+                                    $div.insertAfter($split_);
+                                     for (var i=2;i< children.length;i++) {
+                                        $div[0].append(children[i]);
+                                    }
+                                    this.options.bottomid = '#' + container_id + '_bottom';
+                                }
+                            }
+                        }
+
+                        if (this.v_split) {
                             // ignore border
-                            this.split_dimension = $__default['default'](this.$el).height();
-                            $__default['default'](this.options.topid).css('height',this.options.top_height + this.options.unit);
-                            $__default['default'](this.$el).css('height', this.split_dimension);
+                            $__default['default'](this.options.leftid).css('width', this.options.first_dimension + this.options.unit);
+                            $__default['default'](this.$split).css('width', this.split_dimension);
+                        }
+                        if (this.h_split) {
+                            // ignore border
+                            $__default['default'](this.options.topid).css('height', this.options.first_dimension + this.options.unit);
+                            $__default['default'](this.$split).css('height', this.split_dimension);
                         }
 
                         //attach mouse events
-                        this.$el.on('mousedown', function (event) {
+                        this.$split.on('mousedown', function (event) {
                             if (event.which === 1) {
                                 active_split = _this_initContainer;
                                 active_split.split_start = true;
@@ -387,20 +467,20 @@
                                 active_split.screenY = event.screenY;
 
                                 device_pixel_radio = window.devicePixelRatio / devicePixelRadio_OS;
-                                active_split.$el_.css('position', 'fixed');
+                                active_split.$split_.css('position', 'fixed');
                                 var left = event.clientX - event.offsetX;
                                 var top = event.clientY - event.offsetY;
                                 active_split.ori_left = left;
                                 active_split.ori_top = top;
                                 if (active_split.v_split) {
-                                    active_split.$el_.css('left', left);
-                                    active_split.$el_.css('top', 0);
+                                    active_split.$split_.css('left', left);
+                                    active_split.$split_.css('top', 0);
                                 }
                                 if (active_split.h_split) {
-                                    active_split.$el_.css('top', top);
-                                    active_split.$el_.css('left', 0);
+                                    active_split.$split_.css('top', top);
+                                    active_split.$split_.css('left', 0);
                                 }
-                                $__default['default'](window.top.document.body).append(active_split.$el_);
+                                $__default['default'](window.top.document.body).append(active_split.$split_);
                                 active_split.trigger('split-start');
                             }
                         });

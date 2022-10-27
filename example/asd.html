@@ -11,63 +11,43 @@
     <script src="split.js" type="text/javascript"></script>
 </head>
 <body>
-<div class="split-container-horizontal border border-1 w-100 vh-100"  id="container_0">
-    <div class="split-container-vertical border border-1 split-top" id="fmASDtree0"
-         style="overflow:scroll;background-color: blue">
-        <div class="split-left" id="fmASDtree" src="asdtree.html" height="100%"
+<div class="split-container border border-1 w-100 vh-100" id="container_0"
+     data-first_dimension="20"
+     data-unit="%"
+     data-horizontal="true">
+    <div class="split-container border border-1" id="fmASDtree0"
+         style="overflow:scroll;background-color: blue"
+         data-first_dimension="20"
+         data-unit="%"
+         data-vertical="true">
+        <div id="fmASDtree" src="asdtree.html" height="100%"
              style="overflow:scroll;background-color: purple">This is Div top left
         </div>
-        <div class="v-split"
-             data-left_width="20"
-             data-unit="%"
-             data-leftid="#fmASDtree"
-             data-rightid="#fmASD"
-             id="split1-1" style="width: 12px">
-        </div>
-        <iframe class="split-right" id="fmASD" name="fmASD" src="pvASD.html" height="100%"
+        <iframe id="fmASD" name="fmASD" src="pvASD.html" height="100%"
                 style="overflow:scroll;background-color: yellow"></iframe>
     </div>
-    <div class="h-split"
-         data-top_height="40"
-         data-unit="%"
-         data-topid="#fmASDtree0"
-         data-bottomid="#fmASD0"
-         id="split1" style="height: 12px">
-    </div>
-    <div class="split-container-vertical border border-1 split-bottom" id="fmASD0"
-         style="overflow:scroll;background-color: red">
-        <div class="split-container-horizontal border border-1 split-left" id="fmASDtree2">
-            <iframe class="split-top" id="fmASDtree1" src="asdtree.html" width="100%"
+    <div class="split-container border border-1" id="fmASD0"
+         style="overflow:scroll;background-color: red"
+         data-first_dimension="200"
+         data-unit="px"
+         data-horizontal="true">
+        <div class="split-container border border-1" id="fmASDtree2"
+             data-first_dimension="200"
+             data-unit="px"
+             data-vertical="true">
+            <iframe id="fmASDtree1" src="asdtree.html" width="100%"
                     style="overflow:scroll;background-color: green"></iframe>
-            <div class="h-split"
-                 data-top_height="200"
-                 data-unit="px"
-                 data-topid="#fmASDtree1"
-                 data-bottomid="#fmASD1"
-                 id="split1-2-1" style="height: 12px">
-            </div>
-            <div class="split-bottom" id="fmASD1" name="fmASD1" src="pvASD.html" width="100%"
+            <div id="fmASD1" name="fmASD1" src="pvASD.html" width="100%"
                  style="overflow:scroll;background-color: orange">This is Div bottom left bottom
             </div>
         </div>
-        <div class="v-split"
-             data-left_width="50"
-             data-unit="%"
-             data-leftid="#fmASDtree2"
-             data-rightid="#fmASD2"
-             id="split1-1-1" style="width: 12px">
-        </div>
-        <div class="split-container-horizontal border border-1 split-right" id="fmASD2">
-            <iframe class="split-top" id="fmASDtree11" src="asdtree.html" width="100%"
+        <div class="split-container border border-1" id="fmASD2"
+             data-first_dimension="300"
+             data-unit="px"
+             data-horizontal="true">
+            <iframe id="fmASDtree11" src="asdtree.html" width="100%"
                     style="overflow:scroll;background-color: green"></iframe>
-            <div class="h-split"
-                 data-top_height="300"
-                 data-unit="px"
-                 data-topid="#fmASDtree11"
-                 data-bottomid="#fmASD11"
-                 id="split1-2-2" style="height: 12px">
-            </div>
-            <div class="split-bottom" id="fmASD11" name="fmASD1" src="pvASD.html" width="100%"
+            <div id="fmASD11" name="fmASD1" src="pvASD.html" width="100%"
                  style="overflow:scroll;background-color: orange">This is Div bottom right bottom
             </div>
         </div>
@@ -76,11 +56,10 @@
 </body>
 <script>
     $().ready(function () {
-        $('.v-split').split();
-        $('.h-split').split();
+        $('.split-container').split();
     })
 
-    $('.v-split, .h-split').on('split-done.bs.split', function () {
+    $('.split-container').on('split-done.bs.split', function () {
         console.log('split changed');
     }).on('init-success.bs.split', function () {
         console.log('split initialized');
