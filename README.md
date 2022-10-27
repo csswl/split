@@ -26,4 +26,10 @@ if you move the cursor to the split (any one) or the scroll bar (all these eleme
 
 If it is running under web server, it is no problem.
 
+Changed the split container's data-* in order to simplify the html configuation.
+Now you only need to set the container data-* attributes, plug-in will automatically create the split. 
+The plug-in use the first element in the container to create the first part of container (left or top),
+The others in the container will group as second part of container. Between these two parts is the split. 
+Plug-in will automatically create id for the two parts in the container with format 'split-container-1/2/3...' if they have no id. 
+
 

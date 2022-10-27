@@ -397,10 +397,10 @@
                                     $__default['default'](children[2]).addClass('split-right');
                                 } else {
                                     var $div = $__default['default']('<div class=\"split-right\" id=\"' + container_id + '_right' + '\"></div>');
-                                    $div.insertAfter($split_);
                                     for (var i=2;i< children.length;i++) {
                                         $div[0].append(children[i]);
                                     }
+                                    $div.insertAfter($split_);
                                     this.options.rightid = '#' + container_id + '_right';
                                 }
                             }
@@ -438,10 +438,10 @@
                                     $__default['default'](children[2]).addClass('split-bottom');
                                 } else {
                                     var $div = $__default['default']('<div class=\"split-bottom\" id=\"' + container_id + '_bottom' + '\"></div>');
-                                    $div.insertAfter($split_);
                                      for (var i=2;i< children.length;i++) {
                                         $div[0].append(children[i]);
                                     }
+                                     $div.insertAfter($split_);
                                     this.options.bottomid = '#' + container_id + '_bottom';
                                 }
                             }
