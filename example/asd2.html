@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ASD</title>
+    <META content="text/html; charset=UTF-8" http-equiv="content-type">
+    <META content="width=device-width, minimum-scale=1, maximum-scale=1,user-scalable=no" name="viewport">
+    <script src="bootstrap.js" type="text/javascript"></script>
+    <link href="bootstrap.css" rel="stylesheet" type="text/css">
+    <script src="jquery-3.6.0.js" type="text/javascript"></script>
+    <link href="split.css" rel="stylesheet" type="text/css">
+    <script src="split.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="split-container split-container-horizontal border border-4 w-100 vh-100" id="container_0">
+    <div class="split-container split-container-vertical border border-4 split-top" id="fmASDtree0"
+         style="height: 20%;overflow:auto;background-color: blue;resize: vertical">
+        <div id="fmASDtree" src="asdtree.html" class="split-left" height="100%"
+             style="width: 30%; overflow:hidden;background-color: purple; resize: horizontal">This is Div top left
+        </div>
+        <iframe id="fmASD" name="fmASD" src="pvASD.html" class="split-right" height="100%"
+                style="overflow:scroll;background-color: yellow"></iframe>
+    </div>
+    <div class="split-container split-container-horizontal border border-4 split-bottom" id="fmASD0"
+         style="overflow:auto;background-color: red;">
+        <div class="split-container split-container-vertical border border-4 split-top" id="fmASDtree2"
+             style="height: 300px;overflow:hidden; resize: vertical">
+            <iframe id="fmASDtree1" src="asdtree.html" width="100%" class="split-left"
+                    style="width: 250px; overflow:scroll;background-color: green; resize: horizontal"></iframe>
+            <div id="fmASD1" name="fmASD1" src="pvASD.html" class="split-right" width="100%"
+                 style="overflow:auto;background-color: orange">This is Div bottom left bottom
+            </div>
+        </div>
+        <div class="split-container split-container-vertical border border-4 split-bottom" id="fmASD2">
+            <iframe id="fmASDtree11" src="asdtree.html" class="split-left" width="100%"
+                    style="width: 50%; overflow:scroll;background-color: green; resize: horizontal"></iframe>
+            <div class="split-right">
+                <div id="fmASD11" name="fmASD1" src="pvASD.html" width="100%"
+                     style="overflow:scroll;background-color: orange">This is Div bottom right bottom
+                </div>
+                <div id="fmASD12" name="fmASD1" src="pvASD.html" width="100%"
+                     style="overflow:scroll;background-color: orange">This is Div bottom right bottom
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+
+</script>
+</html>

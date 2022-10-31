@@ -81,151 +81,6 @@
         } catch (e) { // ignore
         }
 
-        function v_split_adjust() {
-            // console.log('deltaX=' + this.deltaX);
-            var parent_width;
-            // with boxing-size
-            // due to boxing-size, the width may include padding, etc, TODO
-            if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.leftid).css('width', '+=' + this.deltaX + 'px');
-            }
-            if (this.options.unit === '%') {
-                // ignore the border margin padding (to complex, TODO)
-                parent_width = $__default['default'](this.$split[0].parentElement).width();
-                var delta = this.deltaX / parent_width * 100;
-                $__default['default'](this.options.leftid).css('width', '+=' + delta + '%');
-            }
-            $__default['default'](this.$split).css('width', this.split_dimension);
-        }
-
-        function h_split_adjust() {
-            // console.log('deltaY=' + this.deltaY);
-            var parent_height;
-            if (this.options.unit.toLowerCase() === 'px') {
-                $__default['default'](this.options.topid).css('height', '+=' + this.deltaY + 'px');
-            }
-            if (this.options.unit === '%') {
-                // ignore the border margin padding (to complex, TODO)
-                parent_height = $__default['default'](this.$split[0].parentElement).height();
-                var delta = this.deltaY / parent_height * 100;
-                $__default['default'](this.options.topid).css('height', '+=' + delta + '%');
-            }
-            $__default['default'](this.$split).css('height', this.split_dimension);
-        }
-
-        var device_pixel_radio;
-        var devicePixelRadio_OS;
-
-        function move_split_screen(event) {
-            if (active_split === undefined) {
-                return;
-            }
-            var deltaX, deltaY;
-            var left;
-            var top;
-            device_pixel_radio = window.devicePixelRatio / devicePixelRadio_OS;
-            deltaX = (event.screenX - active_split.screenX) / device_pixel_radio;
-            deltaY = (event.screenY - active_split.screenY) / device_pixel_radio;
-
-            if (event.type === 'mousemove') {
-                if (active_split.v_split) {
-                    active_split.$split_.css('left', active_split.ori_left + deltaX);
-                }
-                if (active_split.h_split) {
-                    active_split.$split_.css('top', active_split.ori_top + deltaY);
-                }
-            }
-            if (event.type === 'mouseup') {
-                active_split.deltaX = deltaX;
-                active_split.deltaY = deltaY;
-                if (active_split.v_split) {
-                    v_split_adjust.call(active_split);
-                }
-                if (active_split.h_split) {
-                    h_split_adjust.call(active_split);
-                }
-                active_split.$split_.detach();
-            }
-        }
-
-
-        function mouse_move(event) {
-            if (event.which === 1 && active_split) {
-                move_split_screen(event);
-            }
-        }
-
-        function mouse_up(event) {
-            if (event.which === 1 && active_split) {
-                move_split_screen(event);
-                active_split.split_start = false;
-                active_split = undefined;
-
-            }
-        }
-
-        function set_iframe_mouseevent_it(split, $ele, event_dict) {
-            if ($ele.length && $ele[0].tagName === 'IFRAME') {
-                $ele.on('load', function () {
-                    $__default['default'].each(event_dict, function (eventtype, eventhandler) {
-                        $__default['default']($ele[0].contentDocument).on(eventtype, eventhandler);
-                    });
-                    set_iframe_mouseevent_it(split, $__default['default']($ele[0].contentDocument), event_dict);
-                });
-                return;
-            }
-
-            $__default['default']('iframe', $ele).on('load', function () {
-                var doc = this;
-                $__default['default'].each(event_dict, function (eventtype, eventhandler) {
-                    $__default['default'](doc.contentDocument).on(eventtype, eventhandler);
-                });
-                set_iframe_mouseevent_it(split, $__default['default'](doc.contentDocument), event_dict);
-            });
-        }
-
-        function set_iframe_mouseevent(split, event_dict) {
-            var $left = split.options.leftid ? $__default['default'](split.options.leftid) : undefined;
-            var $right = split.options.rightid ? $__default['default'](split.options.rightid) : undefined;
-            var $top = split.options.topid ? $__default['default'](split.options.topid) : undefined;
-            var $bottom = split.options.bottomid ? $__default['default'](split.options.bottomid) : undefined;
-
-            //let all iframes belongs to the split dealing the related mouse events
-            if ($left) {
-                set_iframe_mouseevent_it(split, $left, event_dict);
-            }
-            if ($right) {
-                set_iframe_mouseevent_it(split, $right, event_dict);
-            }
-            if ($top) {
-                set_iframe_mouseevent_it(split, $top, event_dict);
-            }
-            if ($bottom) {
-                set_iframe_mouseevent_it(split, $bottom, event_dict);
-            }
-        }
-
-        function detectZoom() {
-            //the code comes from https://www.cnblogs.com/chenzeyongjsj/p/10430975.html
-            var ratio = 0,
-                screen = window.screen,
-                ua = navigator.userAgent.toLowerCase();
-
-            if (~ua.indexOf("firefox")) {
-                if (window.devicePixelRatio !== undefined) {
-                    ratio = window.devicePixelRatio;
-                }
-            } else if (~ua.indexOf("msie")) {
-                if (screen.deviceXDPI && screen.logicalXDPI) {
-                    ratio = screen.deviceXDPI / screen.logicalXDPI;
-                }
-            } else if (window.outerWidth !== undefined && window.innerWidth !== undefined) {
-                ratio = window.outerWidth / window.innerWidth;
-            }
-            // TODO 360安全浏览器下的innerWidth包含了侧边栏的宽度
-            return ratio;
-        }
-
         var CONSTANTS = {
             4: {
                 classes: {},
@@ -255,9 +110,11 @@
                 return false;
             },
             onsplitStart: function onsplitStart() {
+
+            },
+            onsplitDragging: function onsplitDragging() {
                 return false;
             },
-            onsplitDragging: move_split_screen(),
             onsplitDone: function onsplitDone() {
                 return false;
             },
@@ -282,16 +139,10 @@
             DEFAULTS: DEFAULTS,
             METHODS: METHODS,
             EVENTS: EVENTS,
-            LOCALES: {
-                en: EN,
-                'en-US': EN
-            }
         };
 
         var active_split;
         var container_sequence = 0;
-        var set_document_mouse_move_up_event = false;
-
         var split = /*#__PURE__*/ function () {
             function split(el, options) {
                 _classCallCheck(this, split);
@@ -311,7 +162,6 @@
                     }
 
                     this.initConstants();
-                    this.initLocale();
                     this.initContainer();
                     this.trigger('init-success');
                 }
@@ -326,34 +176,9 @@
                     }
                 },
                 {
-                    key: "initLocale",
-                    value: function initLocale() {
-                        if (this.options.locale) {
-                            var locales = $__default['default'].fn.split.locales;
-                            var parts = this.options.locale.split(/[-_]/);
-                            parts[0] = parts[0].toLowerCase();
-
-                            if (parts[1]) {
-                                parts[1] = parts[1].toUpperCase();
-                            }
-
-                            if (locales[this.options.locale]) {
-                                $__default['default'].extend(this.options, locales[this.options.locale]);
-                            } else if (locales[parts.join('-')]) {
-                                $__default['default'].extend(this.options, locales[parts.join('-')]);
-                            } else if (locales[parts[0]]) {
-                                $__default['default'].extend(this.options, locales[parts[0]]);
-                            }
-                        }
-                    }
-                },
-                {
                     key: "initContainer",
                     value: function initContainer() {
                         var _this_initContainer = this;
-                        this.split_start = false;
-                        this.deltaX = 0;
-                        this.deltaY = 0;
                         this.$container = this.$el;
                         this.$container.addClass('bootstrap-split');
 
@@ -385,7 +210,6 @@
                                 var $split_ = $__default['default']('<div class=\"v-split\" id=\"' + container_id + '_split' + '\"></div>');
                                 $split_.insertAfter($__default['default'](children[0]));
                                 this.$split = $split_;
-                                this.$split_ = $split_.clone();
 
                                 //create right
                                 // we has add one split, the length increased by 1
@@ -405,6 +229,29 @@
                                     }
                                     this.options.rightid = '#' + container_id + '_right';
                                 }
+
+                                this.$split.on('mousedown', function (event) {
+                                    if (event.which === 1) {
+                                        $__default['default'](_this_initContainer.options.leftid).css({
+                                            'overflow': 'auto',
+                                            'resize': 'horizontal'
+                                        });
+                                        active_split = _this_initContainer;
+                                        var nevent = $__default['default'].Event('resize');
+                                        nevent.screenX = event.screenX - 2;
+                                        nevent.screenY = event.screenY + 10;
+
+                                        $__default['default'](_this_initContainer.options.leftid).trigger(nevent);
+                                        _this_initContainer.trigger('split-start');
+                                    }
+                                });
+
+                                $__default['default'](this.options.leftid).css('width', this.options.first_dimension + this.options.unit);
+                                $__default['default'](this.$split).css('width', this.split_dimension);
+
+                                $__default['default'](_this_initContainer.options.leftid).on('resize', function (event){
+                                    console.log('mouse down, event=' + event);
+                                })
                             }
                         }
 
@@ -426,7 +273,6 @@
                                 var $split_ = $__default['default']('<div class=\"h-split\" id=\"' + container_id + '_split' + '\"></div>');
                                 $split_.insertAfter($__default['default'](children[0]));
                                 this.$split = $split_;
-                                this.$split_ = $split_.clone();
 
                                 //create bottom
                                 // we has add one split, the length increased by 1
@@ -446,58 +292,21 @@
                                     }
                                     this.options.bottomid = '#' + container_id + '_bottom';
                                 }
+
+                                this.$split.on('mousedown', function (event) {
+                                    if (event.which === 1) {
+                                        $__default['default'](_this_initContainer.options.topid).css({
+                                            'overflow': 'auto',
+                                            'resize': 'vertical'
+                                        });
+                                        active_split = _this_initContainer;
+                                        _this_initContainer.trigger('split-start');
+                                    }
+                                });
+
+                                $__default['default'](this.options.topid).css('height', this.options.first_dimension + this.options.unit);
+                                $__default['default'](this.$split).css('height', this.split_dimension);
                             }
-                        }
-
-                        if (this.v_split) {
-                            // ignore border
-                            $__default['default'](this.options.leftid).css('width', this.options.first_dimension + this.options.unit);
-                            $__default['default'](this.$split).css('width', this.split_dimension);
-                        }
-                        if (this.h_split) {
-                            // ignore border
-                            $__default['default'](this.options.topid).css('height', this.options.first_dimension + this.options.unit);
-                            $__default['default'](this.$split).css('height', this.split_dimension);
-                        }
-
-                        if (this.$el.hasClass('use-css-resize')) {
-                            return;
-                        }
-
-                        //attach mouse events
-                        this.$split.on('mousedown', function (event) {
-                            if (event.which === 1) {
-                                active_split = _this_initContainer;
-                                active_split.split_start = true;
-                                active_split.screenX = event.screenX;
-                                active_split.screenY = event.screenY;
-
-                                device_pixel_radio = window.devicePixelRatio / devicePixelRadio_OS;
-                                active_split.$split_.css('position', 'fixed');
-                                var left = event.clientX - event.offsetX;
-                                var top = event.clientY - event.offsetY;
-                                active_split.ori_left = left;
-                                active_split.ori_top = top;
-                                if (active_split.v_split) {
-                                    active_split.$split_.css('left', left);
-                                    active_split.$split_.css('top', 0);
-                                }
-                                if (active_split.h_split) {
-                                    active_split.$split_.css('top', top);
-                                    active_split.$split_.css('left', 0);
-                                }
-                                $__default['default'](window.top.document.body).append(active_split.$split_);
-                                active_split.trigger('split-start');
-                            }
-                        });
-                        set_iframe_mouseevent(_this_initContainer, {'mousemove': mouse_move, 'mouseup': mouse_up});
-                        if (!set_document_mouse_move_up_event) {
-                            $__default['default'](document).on('mousemove', function (event) {
-                                mouse_move(event);
-                            }).on('mouseup', function (event) {
-                                mouse_up(event);
-                            });
-                            set_document_mouse_move_up_event = true;
                         }
                     },
                 },
@@ -598,13 +407,26 @@
         // BOOTSTRAP split INIT
         $__default['default'](function () {
             $__default['default']('[data-toggle="split"]').split();
-            $__default['default'](document).on('mousemove', function (event) {
-                mouse_move(event);
-            }).on('mouseup', function (event) {
-                mouse_up(event);
-            });
-            var radio = detectZoom();
-            devicePixelRadio_OS = Math.round(window.devicePixelRatio / radio * 100) / 100.0;
+
+            window.onmouseup = function (event) {
+                if (event.which === 1 && active_split) {
+                    if (active_split.v_split) {
+                        $__default['default'](active_split.options.leftid).css({
+                            'overflow': 'auto',
+                            'resize': ''
+                        });
+                    }
+                    if (active_split.h_split) {
+                        $__default['default'](active_split.options.topid).css({
+                            'overflow': 'auto',
+                            'resize': ''
+                        });
+                    }
+                    active_split.trigger('split-done');
+                    active_split = undefined;
+                }
+            };
+
         });
         return split;
     }

@@ -18,6 +18,11 @@
     height: 100%;
 }
 
+.split-container-vertical.use-css-resize>.split-left {
+    overflow: auto;
+    resize: horizontal;
+}
+
 .v-split {
     position:relative;
     left: 0%;
@@ -28,6 +33,9 @@
     overflow: hidden;
     margin: 0;
     user-select:none;
+}
+
+:not(.use-css-resize)>.v-split {
     cursor: w-resize;
 }
 
@@ -44,6 +52,11 @@
     width: 100%;
 }
 
+.split-container-horizontal.use-css-resize>.split-top {
+    overflow: auto;
+    resize: vertical;
+}
+
 .h-split {
     position:relative;
     width: 100%;
@@ -54,6 +67,9 @@
     overflow: hidden;
     margin: 0;
     user-select:none;
+}
+
+:not(.use-css-resize)>.h-split {
     cursor: n-resize;
 }
 
@@ -62,4 +78,5 @@
     width: 100%;
     flex: 1;
 }
+
 

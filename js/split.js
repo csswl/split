@@ -290,6 +290,8 @@
 
         var active_split;
         var container_sequence = 0;
+        var set_document_mouse_move_up_event = false;
+
         var split = /*#__PURE__*/ function () {
             function split(el, options) {
                 _classCallCheck(this, split);
@@ -458,6 +460,10 @@
                             $__default['default'](this.$split).css('height', this.split_dimension);
                         }
 
+                        if (this.$el.hasClass('use-css-resize')) {
+                            return;
+                        }
+
                         //attach mouse events
                         this.$split.on('mousedown', function (event) {
                             if (event.which === 1) {
@@ -485,6 +491,14 @@
                             }
                         });
                         set_iframe_mouseevent(_this_initContainer, {'mousemove': mouse_move, 'mouseup': mouse_up});
+                        if (!set_document_mouse_move_up_event) {
+                            $__default['default'](document).on('mousemove', function (event) {
+                                mouse_move(event);
+                            }).on('mouseup', function (event) {
+                                mouse_up(event);
+                            });
+                            set_document_mouse_move_up_event = true;
+                        }
                     },
                 },
                 {
