@@ -598,11 +598,6 @@
         // BOOTSTRAP split INIT
         $__default['default'](function () {
             $__default['default']('[data-toggle="split"]').split();
-            $__default['default'](document).on('mousemove', function (event) {
-                mouse_move(event);
-            }).on('mouseup', function (event) {
-                mouse_up(event);
-            });
             var radio = detectZoom();
             devicePixelRadio_OS = Math.round(window.devicePixelRatio / radio * 100) / 100.0;
         });
